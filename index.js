@@ -11,12 +11,21 @@ const range = document.createRange();
 let speechtext;
 let firstBoundary;
 
-let voices = [];
+// Was: let voices = [];
+const voicesFiltered = [];
 function populateVoiceList () {
-  voices = speechSynthesis.getVoices();
+  const voices = speechSynthesis.getVoices();
+
+  const langFilter = param(/[?&]filter=(\w+)/);
+  const langRex = langFilter ? new RegExp('^' + langFilter) : null;
+  console.warn('Voice language filter:', langRex);
+
   const selectElm = document.querySelector('#voice');
   selectElm.innerHTML = '';
   for (let i = 0; i < voices.length; i++) {
+    if (langRex && !langRex.test(voices[i].lang)) { continue; }
+
+    voicesFiltered.push(voices[i]);
     const option = document.createElement('option');
     option.innerHTML = voices[i].name + ' (' + voices[i].lang + ')';
     option.setAttribute('value', voices[i].voiceURI);
@@ -44,7 +53,8 @@ function speak () {
 
   const utterance = new SpeechSynthesisUtterance(
     document.getElementById('texttospeak').value);
-  utterance.voice = voices[document.getElementById('voice').selectedIndex];
+  const voiceIdx = document.getElementById('voice').selectedIndex;
+  utterance.voice = voicesFiltered[voiceIdx];
   utterance.volume = document.getElementById('volume').value;
   utterance.pitch = document.getElementById('pitch').value;
   const rate = document.getElementById('rate').value;
@@ -59,6 +69,8 @@ function speak () {
   utterance.addEventListener('boundary', handleSpeechEvent);
   utterance.addEventListener('pause', handleSpeechEvent);
   utterance.addEventListener('resume', handleSpeechEvent);
+
+  console.warn('Utterance:', utterance);
 
   speechSynthesis.speak(utterance);
 }
@@ -80,18 +92,20 @@ function handleSpeechEvent (e) {
     case 'boundary':
     {
       if (e.name !== 'word') { break; }
+
       const substr = speechtext.slice(e.charIndex);
       const rex = /\S+/g;
       const res = rex.exec(substr);
       if (!res) return;
-      var startOffset = res.index + e.charIndex;
-      var endOffset = rex.lastIndex + e.charIndex;
+
+      const startOffset = res.index + e.charIndex;
+      const endOffset = rex.lastIndex + e.charIndex;
       range.setStart(textbeingspoken.firstChild, startOffset);
       range.setEnd(textbeingspoken.firstChild, endOffset);
       const rect = range.getBoundingClientRect();
       let delta = 0;
       // do I need to scroll?
-      var parentRect = textbeingspoken.getBoundingClientRect();
+      const parentRect = textbeingspoken.getBoundingClientRect();
       if (rect.bottom > parentRect.bottom) {
         delta = rect.bottom - parentRect.bottom;
       }
@@ -116,4 +130,9 @@ function handleSpeechEvent (e) {
     default:
       break;
   }
+}
+
+function param (regex, def = null) {
+  const matches = window.location.search.match(regex);
+  return matches ? matches[1] : def;
 }
