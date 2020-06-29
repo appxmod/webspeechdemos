@@ -1,54 +1,53 @@
 
+/* eslint no-unused-vars: ["error", { "varsIgnorePattern": "stop|playpause|speak" }] */
 
-var texttospeak = document.getElementById('texttospeak');
-var textbeingspoken = document.getElementById('textbeingspoken');
-var marker = document.getElementById('marker');
-var range = document.createRange();
-var speechtext;
-var firstBoundary;
+const { speechSynthesis, SpeechSynthesisUtterance } = window;
 
-var voices = [];
-function populateVoiceList() {
-  voices = window.speechSynthesis.getVoices();
-  var selectElm = document.querySelector('#voice');
+const texttospeak = document.getElementById('texttospeak');
+const textbeingspoken = document.getElementById('textbeingspoken');
+const marker = document.getElementById('marker');
+
+const range = document.createRange();
+let speechtext;
+let firstBoundary;
+
+let voices = [];
+function populateVoiceList () {
+  voices = speechSynthesis.getVoices();
+  const selectElm = document.querySelector('#voice');
   selectElm.innerHTML = '';
-  for (var i=0;i < voices.length;i++) {
-    var option = document.createElement('option');
+  for (let i = 0; i < voices.length; i++) {
+    const option = document.createElement('option');
     option.innerHTML = voices[i].name + ' (' + voices[i].lang + ')';
     option.setAttribute('value', voices[i].voiceURI);
     option.voice = voices[i];
-    if (voices[i].default)
-      option.selected = true;
+    if (voices[i].default) { option.selected = true; }
     selectElm.appendChild(option);
   }
 }
 
 populateVoiceList();
-if (speechSynthesis.onvoiceschanged !== undefined)
-  speechSynthesis.onvoiceschanged = populateVoiceList;
+if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = populateVoiceList; }
 
-function stop() {
+function stop () {
   speechSynthesis.cancel();
 }
 
-function playpause() {
-  if (speechSynthesis.paused)
-    speechSynthesis.resume();
-  else
-    speechSynthesis.pause();
+function playpause () {
+  if (speechSynthesis.paused) { speechSynthesis.resume(); } else { speechSynthesis.pause(); }
 }
 
-function speak() {
+function speak () {
   speechtext = texttospeak.value;
   firstBoundary = true;
   textbeingspoken.textContent = speechtext;
 
-  utterance = new SpeechSynthesisUtterance(
+  const utterance = new SpeechSynthesisUtterance(
     document.getElementById('texttospeak').value);
   utterance.voice = voices[document.getElementById('voice').selectedIndex];
   utterance.volume = document.getElementById('volume').value;
   utterance.pitch = document.getElementById('pitch').value;
-  var rate = document.getElementById('rate').value;
+  const rate = document.getElementById('rate').value;
   utterance.rate = Math.pow(Math.abs(rate) + 1, rate < 0 ? -1 : 1);
   utterance.addEventListener('start', function () {
     marker.classList.remove('animate');
@@ -64,7 +63,7 @@ function speak() {
   speechSynthesis.speak(utterance);
 }
 
-function handleSpeechEvent(e) {
+function handleSpeechEvent (e) {
   console.log('Speech Event:', e);
 
   switch (e.type) {
@@ -80,18 +79,17 @@ function handleSpeechEvent(e) {
       break;
     case 'boundary':
     {
-      if (e.name != 'word')
-        break;
-      var substr = speechtext.slice(e.charIndex);
-      var rex = /\S+/g;
-      var res = rex.exec(substr);
+      if (e.name !== 'word') { break; }
+      const substr = speechtext.slice(e.charIndex);
+      const rex = /\S+/g;
+      const res = rex.exec(substr);
       if (!res) return;
       var startOffset = res.index + e.charIndex;
       var endOffset = rex.lastIndex + e.charIndex;
       range.setStart(textbeingspoken.firstChild, startOffset);
       range.setEnd(textbeingspoken.firstChild, endOffset);
-      var rect = range.getBoundingClientRect();
-      var delta = 0;
+      const rect = range.getBoundingClientRect();
+      let delta = 0;
       // do I need to scroll?
       var parentRect = textbeingspoken.getBoundingClientRect();
       if (rect.bottom > parentRect.bottom) {
