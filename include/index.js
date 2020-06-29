@@ -1,6 +1,8 @@
 
 /* eslint no-unused-vars: ["error", { "varsIgnorePattern": "stop|playpause|speak" }] */
 
+export { stop, playpause, speak };
+
 const { speechSynthesis, SpeechSynthesisUtterance } = window;
 
 const texttospeak = document.getElementById('texttospeak');
@@ -8,6 +10,7 @@ const textbeingspoken = document.getElementById('textbeingspoken');
 const marker = document.getElementById('marker');
 
 const range = document.createRange();
+
 let speechtext;
 let firstBoundary;
 
@@ -70,7 +73,7 @@ function speak () {
   utterance.addEventListener('pause', handleSpeechEvent);
   utterance.addEventListener('resume', handleSpeechEvent);
 
-  console.warn('Utterance:', utterance);
+  console.warn('Utterance:', utterance, speechSynthesis);
 
   speechSynthesis.speak(utterance);
 }
@@ -96,6 +99,8 @@ function handleSpeechEvent (e) {
       const substr = speechtext.slice(e.charIndex);
       const rex = /\S+/g;
       const res = rex.exec(substr);
+      // console.warn('Marker:', substr, res, marker, range);
+
       if (!res) return;
 
       const startOffset = res.index + e.charIndex;
@@ -116,15 +121,18 @@ function handleSpeechEvent (e) {
       textbeingspoken.scrollTop += delta;
       texttospeak.scrollTop = textbeingspoken.scrollTop;
 
-      marker.style.top = rect.top - delta - 1;
-      marker.style.left = rect.left - 1;
-      marker.style.width = rect.width + 1;
-      marker.style.height = rect.height + 1;
+      marker.style.top = `${rect.top - delta - 1}px`;
+      marker.style.left = `${rect.left - 1}px`;
+      marker.style.width = `${rect.width + 1}px`;
+      marker.style.height = `${rect.height + 1}px`;
       marker.classList.add('moved');
+
       if (firstBoundary) {
         firstBoundary = false;
         marker.classList.add('animate');
       }
+
+      // console.warn('Marker (2):', rect, delta);
       break;
     }
     default:

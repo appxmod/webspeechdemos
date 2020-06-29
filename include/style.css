@@ -8,17 +8,23 @@ h1 {
   margin: 2rem auto;
   font-size: 150%;
 }
-form {
+[ role = form ],
+.X-form {
   max-width: 480px;
   margin: 0 auto;
 }
-button, select {
+button {
+  cursor: pointer;
+}
+button,
+select {
   background-color: #fff;
   border: none;
   border-radius: 2px;
   height: 1.5rem;
+  font-size: 1rem;
 }
-select {
+.X-select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -26,6 +32,7 @@ select {
 
 /* Some firefox range styling */
 input[type=range] {
+  cursor: grab;
   -moz-appearance: none;
 }
 input[type=range]::-moz-range-thumb {
@@ -52,12 +59,14 @@ input[type=range]::-moz-range-track {
   display: inline-block;
   width: 20%;
 }
-.speecharg input, .speecharg select {
+.speecharg input,
+.speecharg select {
   display: inline-block;
   width: calc(80% - 3rem);
   margin: 0;
 }
 .speecharg button {
+  font-size: 1.3rem;
   width: 1.5rem;
   height: 1.5rem;
   margin: 0 0 0 1.5rem;
@@ -82,20 +91,20 @@ input[type=range]::-moz-range-track {
 }
 
 #textarea {
-   width: 100%;
-   height: 8rem;
-   display: block;
-   margin-bottom: 1rem;
-   border-radius: 5px;
-   position: relative;
-   background-color: #fff;
-   transition: background-color 100ms ease;
-   -webkit-transition: background-color 100ms ease;
- }
+  width: 100%;
+  height: 8rem;
+  display: block;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  position: relative;
+  background-color: #fff;
+  transition: background-color 100ms ease;
+  -webkit-transition: background-color 100ms ease;
+}
 
- .speaking #textarea {
+.speaking #textarea {
   background-color: #333;
- }
+}
 
 #textarea > * {
   position: absolute;
@@ -109,9 +118,9 @@ input[type=range]::-moz-range-track {
   margin: .5rem;
   padding: 0;
   white-space: pre-wrap;
-  line-height: 1.1rem;
+  line-height: 1.3rem;
   background-color: transparent;
-  font-size: 12px;
+  font-size: 1rem; /* Was: 12px */
   font-family: monospace;
 }
 
