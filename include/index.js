@@ -1,6 +1,4 @@
 
-/* eslint no-unused-vars: ["error", { "varsIgnorePattern": "stop|playpause|speak" }] */
-
 export { stop, playpause, speak };
 
 const { speechSynthesis, SpeechSynthesisUtterance } = window;
@@ -25,6 +23,7 @@ function populateVoiceList () {
 
   const selectElm = document.querySelector('#voice');
   selectElm.innerHTML = '';
+
   for (let i = 0; i < voices.length; i++) {
     if (langRex && !langRex.test(voices[i].lang)) { continue; }
 
@@ -39,14 +38,18 @@ function populateVoiceList () {
 }
 
 populateVoiceList();
-if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = populateVoiceList; }
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = populateVoiceList;
+}
 
 function stop () {
   speechSynthesis.cancel();
 }
 
 function playpause () {
-  if (speechSynthesis.paused) { speechSynthesis.resume(); } else { speechSynthesis.pause(); }
+  if (speechSynthesis.paused) {
+    speechSynthesis.resume();
+  } else { speechSynthesis.pause(); }
 }
 
 function speak () {
@@ -54,14 +57,14 @@ function speak () {
   firstBoundary = true;
   textbeingspoken.textContent = speechtext;
 
-  const utterance = new SpeechSynthesisUtterance(
-    document.getElementById('texttospeak').value);
+  const utterance = new SpeechSynthesisUtterance(speechtext);
   const voiceIdx = document.getElementById('voice').selectedIndex;
   utterance.voice = voicesFiltered[voiceIdx];
   utterance.volume = document.getElementById('volume').value;
   utterance.pitch = document.getElementById('pitch').value;
   const rate = document.getElementById('rate').value;
   utterance.rate = Math.pow(Math.abs(rate) + 1, rate < 0 ? -1 : 1);
+
   utterance.addEventListener('start', function () {
     marker.classList.remove('animate');
     document.body.classList.add('speaking');
