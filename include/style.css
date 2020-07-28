@@ -1,6 +1,6 @@
 
 body {
-  background-color: #333;
+  background-color: #2e2e2e;
   color: #fff;
 }
 h1 {
@@ -171,4 +171,12 @@ button > img {
   display: block;
   margin-bottom: 0.25rem;
   width: 100%;
+}
+
+#log {
+  background: #333;
+  border: 1px solid #666;
+  display: block;
+  padding: .6rem;
+  white-space: pre-wrap;
 }

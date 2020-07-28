@@ -6,6 +6,7 @@ const { speechSynthesis, SpeechSynthesisUtterance } = window;
 const texttospeak = document.getElementById('texttospeak');
 const textbeingspoken = document.getElementById('textbeingspoken');
 const marker = document.getElementById('marker');
+const LOG = document.getElementById('log');
 
 const range = document.createRange();
 
@@ -36,7 +37,15 @@ function populateVoiceList () {
     if (voice.default) { option.selected = true; }
 
     selectElm.appendChild(option);
+
+    voicesArray.push(plainObject(voice));
   });
+
+  console.warn('Filtered voices:', voicesFiltered);
+
+  LOG.textContent += `Count of voices :~ ${VOICES.length}\n`;
+  LOG.textContent += `Filtered voices :~ ${voicesFiltered.length}\n`;
+  LOG.textContent += JSON.stringify(voicesArray, null, 2);
 }
 
 populateVoiceList();
@@ -149,3 +158,21 @@ function param (regex, def = null) {
   const matches = window.location.search.match(regex);
   return matches ? matches[1] : def;
 }
+
+// ---------------------------------
+
+// Include non-inumerable / inherited properties?
+// https://medium.com/javascript-in-plain-english/5-easy-ways-to-iterate-over-javascript-object-properties-913d048e827f#
+function plainObject (obj) {
+  const result = {};
+  /* Object.keys(obj).forEach(key => result[ key ] = obj[ key ]); */
+  for (const key in obj) { result[key] = obj[key]; }
+  return result;
+}
+
+const NAV = window.navigator;
+
+console.warn('User agent :~', NAV.userAgent);
+console.warn(NAV);
+
+LOG.textContent = `${NAV.userAgent}\n\n`;
