@@ -1,0 +1,26 @@
+{
+  "private": true,
+  "name": "webspeechdemos",
+  "version": "2.0.0",
+  "license": "UNLICENSED",
+  "homepage": "https://nfreear.github.io/webspeechdemos/?filter=en",
+  "repository": "https://github.com/nfreear/webspeechdemos.git",
+  "X-homepage": "https://eeejay.github.io/webspeechdemos/",
+  "X-repository": "https://github.com/eeejay/webspeechdemos.git",
+  "scripts": {
+    "fix": "semistandard --fix index.js",
+    "start": "live-server --port=9002 --no-browser",
+    "test": "semistandard"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.1",
+    "semistandard": "^14.2.2"
+  },
+  "eslintConfig": {},
+  "semistandard": {
+    "ignore": [ "rates.js" ],
+    "X-rules": {
+        "no-unused-vars": [ "error", { "varsIgnorePattern": "stop|playpause|speak" } ]
+    }
+  }
+}
