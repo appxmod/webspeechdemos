@@ -39,6 +39,7 @@ CancelForm.addEventListener('reset', ev => {
 });
 
 // --------------------------------------------
+// Reset button handlers.
 
 PitchResetBtn.addEventListener('click', ev => {
   document.getElementById('pitch').value = 0.5;

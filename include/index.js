@@ -12,10 +12,9 @@ const range = document.createRange();
 let speechtext;
 let firstBoundary;
 
-// Was: let voices = [];
-const voicesFiltered = [];
+let voicesFiltered = [];
 function populateVoiceList () {
-  const voices = speechSynthesis.getVoices();
+  const VOICES = speechSynthesis.getVoices();
 
   const langFilter = param(/[?&]filter=(\w+)/);
   const langRex = langFilter ? new RegExp('^' + langFilter) : null;
@@ -24,17 +23,20 @@ function populateVoiceList () {
   const selectElm = document.querySelector('#voice');
   selectElm.innerHTML = '';
 
-  for (let i = 0; i < voices.length; i++) {
-    if (langRex && !langRex.test(voices[i].lang)) { continue; }
+  voicesFiltered = langRex ? VOICES.filter(vox => langRex.test(vox.lang)) : VOICES;
 
-    voicesFiltered.push(voices[i]);
+  const voicesArray = [];
+
+  voicesFiltered.forEach(voice => {
     const option = document.createElement('option');
-    option.innerHTML = voices[i].name + ' (' + voices[i].lang + ')';
-    option.setAttribute('value', voices[i].voiceURI);
-    option.voice = voices[i];
-    if (voices[i].default) { option.selected = true; }
+    option.innerHTML = `${voice.name} (${voice.lang})`;
+    option.setAttribute('value', voice.voiceURI);
+    option.voice = voice;
+
+    if (voice.default) { option.selected = true; }
+
     selectElm.appendChild(option);
-  }
+  });
 }
 
 populateVoiceList();
@@ -59,7 +61,7 @@ function speak () {
 
   const utterance = new SpeechSynthesisUtterance(speechtext);
   const voiceIdx = document.getElementById('voice').selectedIndex;
-  utterance.voice = voicesFiltered[voiceIdx];
+  utterance.voice = voicesFiltered[voiceIdx]; // Was: voices.
   utterance.volume = document.getElementById('volume').value;
   utterance.pitch = document.getElementById('pitch').value;
   const rate = document.getElementById('rate').value;
@@ -81,10 +83,10 @@ function speak () {
   speechSynthesis.speak(utterance);
 }
 
-function handleSpeechEvent (e) {
-  console.log('Speech Event:', e);
+function handleSpeechEvent (ev) {
+  console.log('Speech Event:', ev);
 
-  switch (e.type) {
+  switch (ev.type) {
     case 'start':
       marker.classList.remove('animate');
       document.body.classList.add('speaking');
@@ -97,17 +99,17 @@ function handleSpeechEvent (e) {
       break;
     case 'boundary':
     {
-      if (e.name !== 'word') { break; }
+      if (ev.name !== 'word') { break; }
 
-      const substr = speechtext.slice(e.charIndex);
-      const rex = /\S+/g;
-      const res = rex.exec(substr);
+      const substr = speechtext.slice(ev.charIndex);
+      const regex = /\S+/g;
+      const res = regex.exec(substr);
       // console.warn('Marker:', substr, res, marker, range);
 
       if (!res) return;
 
-      const startOffset = res.index + e.charIndex;
-      const endOffset = rex.lastIndex + e.charIndex;
+      const startOffset = res.index + ev.charIndex;
+      const endOffset = regex.lastIndex + ev.charIndex;
       range.setStart(textbeingspoken.firstChild, startOffset);
       range.setEnd(textbeingspoken.firstChild, endOffset);
       const rect = range.getBoundingClientRect();
