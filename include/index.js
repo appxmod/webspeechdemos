@@ -45,7 +45,7 @@ function populateVoiceList () {
 
   LOG.textContent += `Count of voices :~ ${VOICES.length}\n`;
   LOG.textContent += `Filtered voices :~ ${voicesFiltered.length}\n`;
-  LOG.textContent += JSON.stringify(voicesArray, null, 2);
+  LOG.textContent += JSON.stringify(voicesArray, null, 2) + '\n';
 }
 
 populateVoiceList();
@@ -175,4 +175,4 @@ const NAV = window.navigator;
 console.warn('User agent :~', NAV.userAgent);
 console.warn(NAV);
 
-LOG.textContent = `${NAV.userAgent}\n\n`;
+LOG.textContent += `${NAV.userAgent}\n`;

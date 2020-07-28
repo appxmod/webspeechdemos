@@ -9,6 +9,7 @@
   "X-repository": "https://github.com/eeejay/webspeechdemos.git",
   "scripts": {
     "fix": "semistandard --fix index.js",
+    "mac:voices": "say -v? | grep en_",
     "start": "live-server --port=9002 --no-browser",
     "test": "semistandard"
   },
