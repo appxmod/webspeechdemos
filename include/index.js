@@ -17,8 +17,8 @@ let voicesFiltered = [];
 function populateVoiceList () {
   const VOICES = speechSynthesis.getVoices();
 
-  const langFilter = param(/[?&]filter=(\w+)/);
-  const langRex = langFilter ? new RegExp('^' + langFilter) : null;
+  const langFilter = param(/[?&]filter=(\w+(:?-.+)?)/);
+  const langRex = langFilter ? new RegExp('^' + langFilter, 'i') : null;
   console.warn('Voice language filter:', langRex);
 
   const selectElm = document.querySelector('#voice');
@@ -43,15 +43,15 @@ function populateVoiceList () {
 
   console.warn('Filtered voices:', voicesFiltered);
 
-  LOG.textContent += `Count of voices :~ ${VOICES.length}\n`;
-  LOG.textContent += `Filtered voices :~ ${voicesFiltered.length}\n`;
-  LOG.textContent += JSON.stringify(voicesArray, null, 2) + '\n';
+  LOG.textContent += `Count of voices\t:~ ${voicesFiltered.length}\t(filter :~ ${langFilter})\n`;
+  LOG.textContent += `Count of voices\t:~ ${VOICES.length}\t(total)\n`;
+  LOG.textContent += `${jsonPrettyish(voicesArray)}\n`;
 }
 
-populateVoiceList();
-if (speechSynthesis.onvoiceschanged !== undefined) {
+setTimeout(() => populateVoiceList(), 200);
+/* if (speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = populateVoiceList;
-}
+} */
 
 function stop () {
   speechSynthesis.cancel();
@@ -154,12 +154,12 @@ function handleSpeechEvent (ev) {
   }
 }
 
+// ---------------------------------
+
 function param (regex, def = null) {
   const matches = window.location.search.match(regex);
   return matches ? matches[1] : def;
 }
-
-// ---------------------------------
 
 // Include non-inumerable / inherited properties?
 // https://medium.com/javascript-in-plain-english/5-easy-ways-to-iterate-over-javascript-object-properties-913d048e827f#
@@ -170,9 +170,13 @@ function plainObject (obj) {
   return result;
 }
 
+function jsonPrettyish (data) {
+  return JSON.stringify(data, null, 2).replace(/([^\}],)\s+("\w+")/g, '$1 $2').replace(/\{\s+"/g, '{ "');
+}
+
 const NAV = window.navigator;
 
 console.warn('User agent :~', NAV.userAgent);
 console.warn(NAV);
 
-LOG.textContent += `${NAV.userAgent}\n`;
+LOG.textContent += `User agent :~ "${NAV.userAgent}"\n`;
