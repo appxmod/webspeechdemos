@@ -1,7 +1,8 @@
 
+import { BespokeSynthesis, BespokeSynthUtterance /* , useBrowser */ } from './bespoke-synthesis.js';
 export { stop, playpause, speak };
 
-const { speechSynthesis, SpeechSynthesisUtterance } = window;
+const { speechSynthesis /* , SpeechSynthesisUtterance */ } = window;
 
 const texttospeak = document.getElementById('texttospeak');
 const textbeingspoken = document.getElementById('textbeingspoken');
@@ -10,35 +11,37 @@ const LOG = document.getElementById('log');
 
 const range = document.createRange();
 
+const customSynth = new BespokeSynthesis();
+
 let speechtext;
 let firstBoundary;
 
 let voicesFiltered = [];
-function populateVoiceList () {
-  const VOICES = speechSynthesis.getVoices();
+async function populateVoiceList () {
+  const VOICES = await customSynth.getVoices(); // speechSynthesis.getVoices();
 
-  const langFilter = param(/[?&]filter=(\w+(:?-.+)?)/);
+  const langFilter = param(/[?&]filter=(\w+(:?-[^&]+)?)/);
   const langRex = langFilter ? new RegExp('^' + langFilter, 'i') : null;
   console.warn('Voice language filter:', langRex);
 
   const selectElm = document.querySelector('#voice');
   selectElm.innerHTML = '';
 
-  voicesFiltered = langRex ? VOICES.filter(vox => langRex.test(vox.lang)) : VOICES;
+  voicesFiltered = langRex ? VOICES.filter(vox => langRex.test(vox.lang || vox.Locale)) : VOICES;
 
   const voicesArray = [];
 
-  voicesFiltered.forEach(voice => {
+  voicesFiltered.forEach(vox => {
     const option = document.createElement('option');
-    option.innerHTML = `${voice.name} (${voice.lang})`;
-    option.setAttribute('value', voice.voiceURI);
-    option.voice = voice;
+    option.innerHTML = `${vox.name || vox.Name} (${vox.lang || vox.Locale})`;
+    option.setAttribute('value', vox.voiceURI || null);
+    option.voice = vox;
 
-    if (voice.default) { option.selected = true; }
+    if (vox.default) { option.selected = true; }
 
     selectElm.appendChild(option);
 
-    voicesArray.push(plainObject(voice));
+    voicesArray.push(plainObject(vox));
   });
 
   console.warn('Filtered voices:', voicesFiltered);
@@ -54,7 +57,8 @@ setTimeout(() => populateVoiceList(), 200);
 } */
 
 function stop () {
-  speechSynthesis.cancel();
+  customSynth.cancel();
+  // speechSynthesis.cancel();
 }
 
 function playpause () {
@@ -68,8 +72,10 @@ function speak () {
   firstBoundary = true;
   textbeingspoken.textContent = speechtext;
 
-  const utterance = new SpeechSynthesisUtterance(speechtext);
+  const utterance = new BespokeSynthUtterance(speechtext);
   const voiceIdx = document.getElementById('voice').selectedIndex;
+  const voice = voicesFiltered[voiceIdx];
+  console.log('VOX:', utterance, voice);
   utterance.voice = voicesFiltered[voiceIdx]; // Was: voices.
   utterance.volume = document.getElementById('volume').value;
   utterance.pitch = document.getElementById('pitch').value;
@@ -89,7 +95,7 @@ function speak () {
 
   console.warn('Utterance:', utterance, speechSynthesis);
 
-  speechSynthesis.speak(utterance);
+  customSynth.speak(utterance);
 }
 
 function handleSpeechEvent (ev) {
