@@ -8,7 +8,7 @@
   "X-homepage": "https://eeejay.github.io/webspeechdemos/",
   "X-repository": "https://github.com/eeejay/webspeechdemos.git",
   "scripts": {
-    "fix": "semistandard --fix index.js",
+    "fix": "semistandard --fix src/*.js",
     "mac:vox": "say -v? | egrep -i 'en[_-](GB|scot|IE|AU|ZA)'",
     "_": "# http://localhost:9002/?filter=en-(GB|scot|cy|IE|AU|AZ)",
     "start": "npm run _ && live-server --port=9002 --no-browser",
