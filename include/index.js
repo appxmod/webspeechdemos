@@ -1,17 +1,19 @@
 
-import { BespokeSynthesis, BespokeSynthUtterance /* , useBrowser */ } from './bespoke-synthesis.js';
+import { BespokeSynthesis, BespokeSynthUtterance } from './bespoke-synthesis.js';
+import { updateLog, param, plainObject, jsonPrettyish, logBrowser } from './util.js';
+
 export { stop, playpause, speak };
 
-const { speechSynthesis /* , SpeechSynthesisUtterance */ } = window;
+// const { speechSynthesis, SpeechSynthesisUtterance } = window;
 
 const texttospeak = document.getElementById('texttospeak');
 const textbeingspoken = document.getElementById('textbeingspoken');
 const marker = document.getElementById('marker');
-const LOG = document.getElementById('log');
 
 const range = document.createRange();
 
 const customSynth = new BespokeSynthesis();
+logBrowser();
 
 let speechtext;
 let firstBoundary;
@@ -46,9 +48,9 @@ async function populateVoiceList () {
 
   console.warn('Filtered voices:', voicesFiltered);
 
-  LOG.textContent += `Count of voices\t:~ ${voicesFiltered.length}\t(filter :~ ${langFilter})\n`;
-  LOG.textContent += `Count of voices\t:~ ${VOICES.length}\t(total)\n`;
-  LOG.textContent += `${jsonPrettyish(voicesArray)}\n`;
+  updateLog(`Count of voices\t:~ ${voicesFiltered.length}\t(filter :~ ${langFilter})`);
+  updateLog(`Count of voices\t:~ ${VOICES.length}\t(total)`);
+  updateLog(jsonPrettyish(voicesArray));
 }
 
 setTimeout(() => populateVoiceList(), 200);
@@ -62,9 +64,12 @@ function stop () {
 }
 
 function playpause () {
-  if (speechSynthesis.paused) {
+  if (customSynth.paused) {
+    customSynth.resume();
+  } else { customSynth.pause(); }
+  /* if (speechSynthesis.paused) {
     speechSynthesis.resume();
-  } else { speechSynthesis.pause(); }
+  } else { speechSynthesis.pause(); } */
 }
 
 function speak () {
@@ -93,7 +98,7 @@ function speak () {
   utterance.addEventListener('pause', handleSpeechEvent);
   utterance.addEventListener('resume', handleSpeechEvent);
 
-  console.warn('Utterance:', utterance, speechSynthesis);
+  console.warn('Utterance:', utterance, customSynth); // speechSynthesis.
 
   customSynth.speak(utterance);
 }
@@ -161,28 +166,3 @@ function handleSpeechEvent (ev) {
 }
 
 // ---------------------------------
-
-function param (regex, def = null) {
-  const matches = window.location.search.match(regex);
-  return matches ? matches[1] : def;
-}
-
-// Include non-inumerable / inherited properties?
-// https://medium.com/javascript-in-plain-english/5-easy-ways-to-iterate-over-javascript-object-properties-913d048e827f#
-function plainObject (obj) {
-  const result = {};
-  /* Object.keys(obj).forEach(key => result[ key ] = obj[ key ]); */
-  for (const key in obj) { result[key] = obj[key]; }
-  return result;
-}
-
-function jsonPrettyish (data) {
-  return JSON.stringify(data, null, 2).replace(/([^\}],)\s+("\w+")/g, '$1 $2').replace(/\{\s+"/g, '{ "');
-}
-
-const NAV = window.navigator;
-
-console.warn('User agent :~', NAV.userAgent);
-console.warn(NAV);
-
-LOG.textContent += `User agent :~ "${NAV.userAgent}"\n`;

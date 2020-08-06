@@ -2,16 +2,18 @@
 body {
   background-color: #2e2e2e;
   color: #fff;
+  margin: 0 auto;
+  max-width: 36rem; /* 480px; */
 }
 h1 {
-  max-width: 480px;
-  margin: 2rem auto;
+  /* max-width: 480px;
+  margin: 2rem auto; */
   font-size: 150%;
 }
 [ role = form ],
 .X-form {
-  max-width: 480px;
-  margin: 0 auto;
+  /* max-width: 480px;
+  margin: 0 auto; */
 }
 button {
   cursor: pointer;
@@ -173,10 +175,35 @@ button > img {
   width: 100%;
 }
 
-#log {
-  background: #333;
+#log,
+#status {
+  background: #3c3c3c;
   border: 1px solid #666;
   display: block;
   padding: .6rem;
+}
+
+#log {
   white-space: pre-wrap;
+}
+
+#status {
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.error #status {
+  border-color: pink;
+  color: pink;
+}
+
+.success #status {
+  border-color: #5f5;
+  color: #5f5;
+}
+
+.web-api-no .pitch-field,
+.web-api-no .rate-field,
+.web-api-no .volume-field {
+  display: none;
 }

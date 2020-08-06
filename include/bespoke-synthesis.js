@@ -4,6 +4,8 @@
  * @copyright © Nick Freear, 05-August-2020.
  */
 
+import { updateStatus, param } from './util.js';
+
 const { speechSynthesis, SpeechSynthesisUtterance } = window;
 const fetch = window.fetch;
 
@@ -12,17 +14,18 @@ const fetch = window.fetch;
 const TTS_URL = 'https://uksouth.tts.speech.microsoft.com/cognitiveservices';
 const KEY_REGEX = /key=(\w+)/;
 
-export function useBrowser () {
-  const use = !param(KEY_REGEX);
-  console.warn('Use browser speech?', use);
-  return use;
+export function useWebApi () {
+  return !param(KEY_REGEX);
 }
 
 export class BespokeSynthesis {
   // Was: 'export class CustomSynthesis { .. }'
 
-  constructor (xUseBrowser = false) {
-    this.useBrowser = useBrowser();
+  constructor () {
+    this.paused = true;
+
+    console.warn('Use Web Speech API?', useWebApi());
+    updateStatus(useWebApi() ? 'web-api-yes' : 'web-api-no', 'Loading ...');
 
     this.key = param(KEY_REGEX);
 
@@ -30,7 +33,9 @@ export class BespokeSynthesis {
   }
 
   async getVoices () {
-    if (this.useBrowser) {
+    if (useWebApi()) {
+      updateStatus('success', 'OK. Voices loaded (Web Speech API).');
+
       return speechSynthesis.getVoices();
     } else {
       try {
@@ -41,14 +46,20 @@ export class BespokeSynthesis {
           }
         });
         const voiceList = await response.json();
+
         console.warn('Fetch voices:', response, voiceList.length);
+        updateStatus('success', 'OK. Voices loaded from server.');
+
         return voiceList;
-      } catch (err) { console.error('>> ERROR.', err); }
+      } catch (err) {
+        console.error('>> ERROR.', err);
+        updateStatus('error', 'Sorry! Can\'t load voices. <em>(Is the <q>key</q> correct?)</em>');
+      }
     }
   }
 
   async speak (utterThis) {
-    if (this.useBrowser) {
+    if (useWebApi()) {
       return speechSynthesis.speak(utterThis);
     } else {
       try {
@@ -78,6 +89,8 @@ export class BespokeSynthesis {
           AUDIO.muted = false;
         };
 
+        this.paused = false;
+
         /* AUDIO.srcObject = await response.body.getReader();
         */
       } catch (err) { console.error('>> ERROR.', err); }
@@ -85,15 +98,17 @@ export class BespokeSynthesis {
   }
 
   cancel () {
-    this.useBrowser ? speechSynthesis.cancel() : this.$audioElem.pause();
+    useWebApi() ? speechSynthesis.cancel() : this.$audioElem.pause();
   }
 
   pause () {
-    this.useBrowser ? speechSynthesis.pause() : this.$audioElem.pause();
+    useWebApi() ? speechSynthesis.pause() : this.$audioElem.pause();
+    this.paused = true;
   }
 
   resume () {
-    this.useBrowser ? speechSynthesis.resume() : this.$audioElem.play();
+    useWebApi() ? speechSynthesis.resume() : this.$audioElem.play();
+    this.paused = false;
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
@@ -116,9 +131,7 @@ export class BespokeSynthesis {
 // https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
 export class BespokeSynthUtterance {
   constructor (text) {
-    this.useBrowser = useBrowser();
-
-    if (this.useBrowser) {
+    if (useWebApi()) {
       return new SpeechSynthesisUtterance(text);
     } else {
       return {
@@ -129,9 +142,4 @@ export class BespokeSynthUtterance {
       };
     }
   }
-}
-
-function param (regex, def = null) {
-  const matches = window.location.search.match(regex);
-  return matches ? matches[1] : def;
 }
