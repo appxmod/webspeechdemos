@@ -1,4 +1,5 @@
 /**
+ * Utility functions.
  *
  * @copyright © Nick Freear, 29-June-2020.
  */

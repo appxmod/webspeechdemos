@@ -23,13 +23,12 @@ export class BespokeSynthesis {
 
   constructor () {
     this.paused = true;
-
-    console.warn('Use Web Speech API?', useWebApi());
-    updateStatus(useWebApi() ? 'web-api-yes' : 'web-api-no', 'Loading ...');
-
     this.key = param(KEY_REGEX);
 
-    this.$audioElem = document.querySelector('audio');
+    console.warn('Use Web Speech API?', useWebApi());
+    updateStatus(useWebApi() ? 'web-api-yes' : 'web-api-no', 'Loading …');
+
+    this.$audioElem = document.createElement('audio'); // Was: document.querySelector('audio');
   }
 
   async getVoices () {
@@ -67,6 +66,7 @@ export class BespokeSynthesis {
         const response = await fetch(`${TTS_URL}/v1`, {
           method: 'POST',
           headers: {
+            Accept: 'audio/mpeg',
             'Content-Type': 'application/ssml+xml',
             'Ocp-Apim-Subscription-Key': this.key,
             'X-Microsoft-OutputFormat': 'audio-24khz-160kbitrate-mono-mp3'
@@ -79,12 +79,12 @@ export class BespokeSynthesis {
 
         // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams#
         const blob = await response.blob();
-        const url = await URL.createObjectURL(blob);
+        const objectUrl = await URL.createObjectURL(blob);
 
-        console.warn('Fetch speech (2):', url);
+        console.warn('Fetch speech (2):', objectUrl);
 
-        AUDIO.src = url;
-        AUDIO.onloadedmetadata = function (ev) {
+        AUDIO.src = objectUrl;
+        AUDIO.onloadedmetadata = (ev) => {
           AUDIO.play();
           AUDIO.muted = false;
         };
@@ -111,7 +111,7 @@ export class BespokeSynthesis {
     this.paused = false;
   }
 
-  // https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
+  // https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=javascript#adjust-prosody
   utterToSsml (UTTER) {
     const voxName = UTTER.voice.name || UTTER.voice.Name;
     const SSML = `<speak version="1.0" xml:lang="en-US">
@@ -136,7 +136,7 @@ export class BespokeSynthUtterance {
     } else {
       return {
         text,
-        lang: 'en',
+        lang: 'en', // ??
         voice: null,
         addEventListener: () => {}
       };

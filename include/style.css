@@ -3,7 +3,9 @@ body {
   background-color: #2e2e2e;
   color: #fff;
   margin: 0 auto;
-  max-width: 36rem; /* 480px; */
+  max-width: 38rem; /* 480px; */
+  min-width: 16rem;
+  padding: 0 .3rem;
 }
 h1 {
   /* max-width: 480px;
@@ -97,7 +99,7 @@ input[type=range]::-moz-range-track {
   height: 8.5rem;
   display: block;
   margin-bottom: 1rem;
-  border-radius: .3rem; /* Was: 5px */
+  border-radius: .2rem; /* Was: 5px */
   position: relative;
   background-color: #fff;
   transition: background-color 100ms ease;
@@ -179,6 +181,7 @@ button > img {
 #status {
   background: #3c3c3c;
   border: 1px solid #666;
+  border-radius: .2rem;
   display: block;
   padding: .6rem;
 }

@@ -49,7 +49,7 @@ async function populateVoiceList () {
   console.warn('Filtered voices:', voicesFiltered);
 
   updateLog(`Count of voices\t:~ ${voicesFiltered.length}\t(filter :~ ${langFilter})`);
-  updateLog(`Count of voices\t:~ ${VOICES.length}\t(total)`);
+  updateLog(`Count of voices\t:~ ${VOICES.length}\t(total)\n`);
   updateLog(jsonPrettyish(voicesArray));
 }
 
