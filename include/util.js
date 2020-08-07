@@ -40,6 +40,17 @@ function jsonPrettyish (data) {
   return JSON.stringify(data, null, 2).replace(/([^}],)\s+("\w+")/g, '$1 $2').replace(/\{\s+"/g, '{ "');
 }
 
+function getMultiTexts () {
+  return [
+    'Call me Ishmael. Some years ago—never mind… DOT.',
+    'Call me Ishmael. Some years ago— … DOT dot.',
+    'Call me Ishmael. Some years ago— … DOT dot dot.',
+    'Call me Ishmael. Some years ago— … DOT dot dot dot.',
+    'Call me Ishmael. Some years ago— … DOT dot dot dot dot.',
+    'Call me Ishmael. Some years ago— … DOT dot dot dot dot dot.'
+  ];
+}
+
 function setTextInput (lang = 'en') {
   // const QUOTE = '’';
   const TEXTS = {
@@ -79,4 +90,4 @@ function addGooTranslate () {
 }
 addGooTranslate();
 
-export { param, updateStatus, updateLog, logBrowser, plainObject, jsonPrettyish, setTextInput };
+export { param, updateStatus, updateLog, logBrowser, plainObject, jsonPrettyish, setTextInput, getMultiTexts };

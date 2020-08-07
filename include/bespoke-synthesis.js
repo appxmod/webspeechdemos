@@ -19,22 +19,26 @@ export class BespokeSynthesis {
 
   constructor (region = DEFAULT_REGION) {
     this.paused = true;
-    this.region = region;
-    this.key = param(API_KEY_REGEX);
+    this.apiRegion = region;
+    this.apiKey = param(API_KEY_REGEX);
+
+    this.speechQueue = [];
+    this.speaking = false;
 
     console.warn('Use Web Speech API?', useWebApi());
     updateStatus(useWebApi() ? 'web-api-yes' : 'web-api-no', 'Loading …');
 
     this.$audioElem = document.createElement('audio'); // Was: document.querySelector('audio');
+    this.$audioElem.addEventListener('ended', ev => this.handleSpeakQueue(ev));
   }
 
   // https://uksouth.tts.speech.microsoft.com/cognitiveservices/v1
-  ttsUrl (path = '') {
-    return `https://${this.region}.tts.speech.microsoft.com/cognitiveservices/${path}`;
+  getUrl (path = '') {
+    return `https://${this.apiRegion}.tts.speech.microsoft.com/cognitiveservices/${path}`;
   }
 
   getApiHeader () {
-    return { 'Ocp-Apim-Subscription-Key': this.key };
+    return { 'Ocp-Apim-Subscription-Key': this.apiKey };
   }
 
   async getVoices () {
@@ -44,7 +48,7 @@ export class BespokeSynthesis {
       return speechSynthesis.getVoices();
     } else {
       try {
-        const response = await fetch(this.ttsUrl('voices/list'), {
+        const response = await fetch(this.getUrl('voices/list'), {
           headers: {
             Accept: 'application/json',
             ...this.getApiHeader()
@@ -63,13 +67,12 @@ export class BespokeSynthesis {
     }
   }
 
-  async speak (utterThis) {
+  async speak (utterance) {
     if (useWebApi()) {
-      return speechSynthesis.speak(utterThis);
+      return speechSynthesis.speak(utterance);
     } else {
       try {
-        const AUDIO = this.$audioElem;
-        const request = new Request(this.ttsUrl('v1'), {
+        const request = new Request(this.getUrl('v1'), {
           method: 'POST',
           headers: {
             Accept: 'audio/mpeg',
@@ -77,19 +80,49 @@ export class BespokeSynthesis {
             'X-Microsoft-OutputFormat': 'audio-24khz-160kbitrate-mono-mp3',
             ...this.getApiHeader()
           },
-          body: this.utterToSsml(utterThis)
+          body: this.utterToSsml(utterance)
         });
+
+        this.speechQueue.push({ request, utterance, dt: new Date() });
+
+        if (!this.speaking) {
+          this.speaking = true;
+
+          console.warn('Speak immediately ?!');
+
+          this.handleSpeakQueue();
+        }
+
+        /* AUDIO.srcObject = await response.body.getReader();
+        */
+      } catch (err) { console.error('>> ERROR.', err); }
+    }
+  }
+
+  async handleSpeakQueue (ev = null) {
+    if (ev) {
+      console.warn('Event:', ev.type, `Length: ${this.speechQueue.length}`, ev);
+
+      this.speaking = false;
+    }
+
+    if (this.speechQueue.length) {
+      this.speaking = true; // <<<< ??
+
+      const AUDIO = this.$audioElem;
+      const { request, utterance, dt } = this.speechQueue.shift();
+      // WAS: const { objectUrl, utterance, dt } = this.speechQueue.shift();
+
+      try {
         const response = await fetch(request);
         const mimeType = await response.headers.get('content-type');
         const key = request.headers.get('Ocp-Apim-Subscription-Key');
 
-        console.warn('Fetch speech:', response, request, key, mimeType);
+        console.debug('Fetch speech:', response, request, key, mimeType);
 
         // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams#
         const blob = await response.blob();
         const objectUrl = await URL.createObjectURL(blob);
-
-        console.warn('Fetch speech (2):', objectUrl);
 
         AUDIO.src = objectUrl;
         AUDIO.onloadedmetadata = (ev) => {
@@ -98,6 +131,8 @@ export class BespokeSynthesis {
         };
 
         this.paused = false;
+
+        console.debug(`Handle queue: "${utterance.text}"`, objectUrl, dt.toISOString());
 
         /* AUDIO.srcObject = await response.body.getReader();
         */

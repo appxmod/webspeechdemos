@@ -1,8 +1,8 @@
 
 import { BespokeSynthesis, BespokeSynthUtterance } from './bespoke-synthesis.js';
-import { updateLog, param, plainObject, jsonPrettyish, logBrowser } from './util.js';
+import { updateLog, param, plainObject, jsonPrettyish, logBrowser, getMultiTexts } from './util.js';
 
-export { stop, playpause, speak };
+export { stop, playpause, speak, multiTextDemo, param };
 
 // const { speechSynthesis, SpeechSynthesisUtterance } = window;
 
@@ -166,3 +166,26 @@ function handleSpeechEvent (ev) {
 }
 
 // ---------------------------------
+
+function multiTextDemo () {
+  const voiceIdx = document.getElementById('voice').selectedIndex;
+
+  getMultiTexts().forEach((text, idx) => {
+    const utterance = new BespokeSynthUtterance(`${idx + 1}. ${text}`);
+    utterance.voice = voicesFiltered[voiceIdx];
+    customSynth.speak(utterance);
+
+    console.warn('>> Multi text demo:', idx);
+  });
+
+  /* getMultiTexts().forEach((text, idx) => {
+    setTimeout(() => {
+      const utterance = new BespokeSynthUtterance(`${idx + 1}. ${text}`);
+      utterance.voice = voicesFiltered[voiceIdx];
+      customSynth.speak(utterance);
+
+      console.warn('>> Multi text demo:', idx);
+    },
+    (idx + 1) * 500);
+  }) */
+}

@@ -1,5 +1,5 @@
 
-import { stop, playpause, speak } from './index.js';
+import { stop, playpause, speak, multiTextDemo, param } from './index.js';
 
 const SpeakForm = document.querySelector('#speak-form');
 const ResumeForm = document.querySelector('#resume-form');
@@ -12,6 +12,13 @@ const VoiceResetBtn = document.querySelector('.voice-field button');
 
 SpeakForm.addEventListener('submit', ev => {
   ev.preventDefault();
+
+  const IS_MULTI = !!param(/multi=(1|on)/);
+  console.warn('^^^ Speak multi?', IS_MULTI);
+  if (IS_MULTI) {
+    stop();
+    return multiTextDemo();
+  }
 
   stop(); // Why?
   speak();
