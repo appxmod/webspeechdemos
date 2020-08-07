@@ -53,6 +53,7 @@ function setTextInput (lang = 'en') {
 }
 
 /* global google */
+// https://support.google.com/translate/thread/35951621?hl=en
 function addGooTranslate () {
   const CALLBACK = 'gooTranslateCB';
   const ADD_TRANSLATE = param(/translate=(1|on)/);
@@ -68,11 +69,11 @@ function addGooTranslate () {
     },
     'goo-translate-element');
 
-    console.warn('G. translate:', google, result);
+    console.warn('Goog. translate:', google, result);
   };
 
   const $SC = document.createElement('script');
-  $SC.src = `http://translate.google.com/translate_a/element.js?cb=${CALLBACK}`;
+  $SC.src = `https://translate.google.com/translate_a/element.js?cb=${CALLBACK}`;
   document.body.appendChild($SC);
   // $SC.onload = () => {};
 }
