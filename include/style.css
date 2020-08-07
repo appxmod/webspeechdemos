@@ -64,10 +64,14 @@ input[type=range]::-moz-range-track {
   width: 20%;
 }
 .speecharg input,
+.speecharg .input,
 .speecharg select {
   display: inline-block;
   width: calc(80% - 3rem);
   margin: 0;
+}
+.speecharg .input > * {
+  width: 100%;
 }
 .speecharg button {
   font-size: 1.3rem;
@@ -206,7 +210,7 @@ button > img {
 }
 
 .web-api-no .pitch-field,
-.web-api-no .rate-field,
+.XX-web-api-no .rate-field,
 .web-api-no .volume-field {
   display: none;
 }

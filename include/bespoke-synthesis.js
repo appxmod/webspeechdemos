@@ -8,27 +8,40 @@ import { updateStatus, param } from './util.js';
 
 const { speechSynthesis, SpeechSynthesisUtterance } = window;
 const fetch = window.fetch;
+const Request = window.Request;
 
 // https://uksouth.tts.speech.microsoft.com/cognitiveservices/voices/list
 // https://uksouth.tts.speech.microsoft.com/cognitiveservices/v1
-const TTS_URL = 'https://uksouth.tts.speech.microsoft.com/cognitiveservices';
-const KEY_REGEX = /key=(\w+)/;
+const DEFAULT_REGION = 'uksouth';
+// const TTS_URL = 'https://uksouth.tts.speech.microsoft.com/cognitiveservices';
+const API_KEY_REGEX = /key=(\w+)/;
 
 export function useWebApi () {
-  return !param(KEY_REGEX);
+  return !param(API_KEY_REGEX);
 }
 
 export class BespokeSynthesis {
   // Was: 'export class CustomSynthesis { .. }'
 
-  constructor () {
+  constructor (region = DEFAULT_REGION) {
     this.paused = true;
-    this.key = param(KEY_REGEX);
+    this.region = region;
+    this.key = param(API_KEY_REGEX);
 
     console.warn('Use Web Speech API?', useWebApi());
     updateStatus(useWebApi() ? 'web-api-yes' : 'web-api-no', 'Loading …');
 
     this.$audioElem = document.createElement('audio'); // Was: document.querySelector('audio');
+
+    // this.setupRateInputField()
+  }
+
+  ttsUrl (path = '') {
+    return `https://${this.region}.tts.speech.microsoft.com/cognitiveservices/${path}`;
+  }
+
+  getApiHeader () {
+    return { 'Ocp-Apim-Subscription-Key': this.key };
   }
 
   async getVoices () {
@@ -38,10 +51,10 @@ export class BespokeSynthesis {
       return speechSynthesis.getVoices();
     } else {
       try {
-        const response = await fetch(`${TTS_URL}/voices/list`, {
+        const response = await fetch(this.ttsUrl('voices/list'), {
           headers: {
             Accept: 'application/json',
-            'Ocp-Apim-Subscription-Key': this.key
+            ...this.getApiHeader()
           }
         });
         const voiceList = await response.json();
@@ -63,19 +76,21 @@ export class BespokeSynthesis {
     } else {
       try {
         const AUDIO = this.$audioElem;
-        const response = await fetch(`${TTS_URL}/v1`, {
+        const request = new Request(this.ttsUrl('v1'), {
           method: 'POST',
           headers: {
             Accept: 'audio/mpeg',
             'Content-Type': 'application/ssml+xml',
-            'Ocp-Apim-Subscription-Key': this.key,
-            'X-Microsoft-OutputFormat': 'audio-24khz-160kbitrate-mono-mp3'
+            'X-Microsoft-OutputFormat': 'audio-24khz-160kbitrate-mono-mp3',
+            ...this.getApiHeader()
           },
           body: this.utterToSsml(utterThis)
         });
+        const response = await fetch(request);
         const mimeType = await response.headers.get('content-type');
+        const key = request.headers.get('Ocp-Apim-Subscription-Key');
 
-        console.warn('Fetch speech:', response, mimeType);
+        console.warn('Fetch speech:', response, request, key, mimeType);
 
         // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams#
         const blob = await response.blob();
@@ -113,10 +128,11 @@ export class BespokeSynthesis {
 
   // https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=javascript#adjust-prosody
   utterToSsml (UTTER) {
-    const voxName = UTTER.voice.name || UTTER.voice.Name;
-    const SSML = `<speak version="1.0" xml:lang="en-US">
-    <voice xml:lang="en-US" name="${voxName}">
-      <prosody pitch="+0%" rate="+0%" volume="+0%">
+    const VOX = UTTER.voice;
+    // Was: `rate="+0%"`
+    const SSML = `<speak version="1.0" xml:lang="${VOX.lang || VOX.Locale}">
+    <voice xml:lang="${VOX.lang || VOX.Locale}" name="${VOX.name || VOX.Name}">
+      <prosody pitch="+0%" rate="${parseFloat(UTTER.rate)}" volume="+0%">
         ${UTTER.text}
       </prosody>
     </voice>
@@ -125,6 +141,16 @@ export class BespokeSynthesis {
     console.warn('Utterance:', UTTER, SSML);
 
     return SSML;
+  }
+
+  getRateInputField (id = 'rate') {
+    return useWebApi()
+      ? `<input id="${id}" type="range" value="0" min="-3" max="3" step="0.25" />`
+      : `<input id="${id}" type="range" value="100" min="10" max="200" step="10.0" />`;
+  }
+
+  setupRateInputField () {
+    document.querySelector('#rate-wrap').innerHTML = this.getRateInputField();
   }
 }
 
@@ -137,6 +163,7 @@ export class BespokeSynthUtterance {
       return {
         text,
         lang: 'en', // ??
+        rate: 1.0,
         voice: null,
         addEventListener: () => {}
       };
