@@ -113,6 +113,7 @@ input[type=range]::-moz-range-track {
   background-color: #333;
 }
 
+#textarea font > *,
 #textarea > * {
   position: absolute;
   display: block;
@@ -213,4 +214,15 @@ button > img {
 .XX-web-api-no .rate-field,
 .web-api-no .volume-field {
   display: none;
+}
+
+body .goog-te-gadget
+/* , body .goog-logo-link:link,
+body .goog-logo-link:visited */ {
+  background-color: #bbb;
+  border-radius: .2rem;
+  padding-left: .4rem;
+  /* color: #eee;
+  font-size: .8rem;
+  font-weight: normal; */
 }

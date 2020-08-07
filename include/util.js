@@ -52,4 +52,30 @@ function setTextInput (lang = 'en') {
   return TEXTS[lang];
 }
 
+/* global google */
+function addGooTranslate () {
+  const CALLBACK = 'gooTranslateCB';
+  const ADD_TRANSLATE = param(/translate=(1|on)/);
+
+  if (!ADD_TRANSLATE) return;
+
+  window[CALLBACK] = () => {
+    const result = new google.translate.TranslateElement({
+      pageLanguage: 'en', // 'en'
+      includedLanguages: 'da,de,en,es,fr,zh-CN',
+      layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
+      gaTrack: false
+    },
+    'goo-translate-element');
+
+    console.warn('G. translate:', google, result);
+  };
+
+  const $SC = document.createElement('script');
+  $SC.src = `http://translate.google.com/translate_a/element.js?cb=${CALLBACK}`;
+  document.body.appendChild($SC);
+  // $SC.onload = () => {};
+}
+addGooTranslate();
+
 export { param, updateStatus, updateLog, logBrowser, plainObject, jsonPrettyish, setTextInput };

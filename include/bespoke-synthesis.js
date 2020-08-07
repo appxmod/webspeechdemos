@@ -6,14 +6,8 @@
 
 import { updateStatus, param } from './util.js';
 
-const { speechSynthesis, SpeechSynthesisUtterance } = window;
-const fetch = window.fetch;
-const Request = window.Request;
-
-// https://uksouth.tts.speech.microsoft.com/cognitiveservices/voices/list
-// https://uksouth.tts.speech.microsoft.com/cognitiveservices/v1
+const { speechSynthesis, SpeechSynthesisUtterance, Request, fetch } = window;
 const DEFAULT_REGION = 'uksouth';
-// const TTS_URL = 'https://uksouth.tts.speech.microsoft.com/cognitiveservices';
 const API_KEY_REGEX = /key=(\w+)/;
 
 export function useWebApi () {
@@ -32,10 +26,9 @@ export class BespokeSynthesis {
     updateStatus(useWebApi() ? 'web-api-yes' : 'web-api-no', 'Loading …');
 
     this.$audioElem = document.createElement('audio'); // Was: document.querySelector('audio');
-
-    // this.setupRateInputField()
   }
 
+  // https://uksouth.tts.speech.microsoft.com/cognitiveservices/v1
   ttsUrl (path = '') {
     return `https://${this.region}.tts.speech.microsoft.com/cognitiveservices/${path}`;
   }
@@ -141,16 +134,6 @@ export class BespokeSynthesis {
     console.warn('Utterance:', UTTER, SSML);
 
     return SSML;
-  }
-
-  getRateInputField (id = 'rate') {
-    return useWebApi()
-      ? `<input id="${id}" type="range" value="0" min="-3" max="3" step="0.25" />`
-      : `<input id="${id}" type="range" value="100" min="10" max="200" step="10.0" />`;
-  }
-
-  setupRateInputField () {
-    document.querySelector('#rate-wrap').innerHTML = this.getRateInputField();
   }
 }
 

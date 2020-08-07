@@ -12,7 +12,8 @@
 
     <div role="form">
       <div id="textarea">
-        <textarea id="texttospeak">Call me Ishmael. Some years ago&#8212;never mind how long precisely&#8212;having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world.</textarea>
+        <textarea id="texttospeak" class="translate" aria-label="Text to speak"
+          >Call me Ishmael. Some years ago&#8212;never mind how long precisely&#8212;having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world.</textarea>
         <div id="textbeingspoken"></div>
       </div>
       <div class="speecharg pitch-field">
@@ -39,12 +40,14 @@
           <button type="reset" class="small" aria-label="Cancel" title="Cancel"><img src="include/stop.svg"></button>
         </form>
       </div>
-      <div class="bottom">
-      </div>
 
+      <div id="goo-translate-element"></div>
 
-      <hr><p><code id="log"></code></p>
+      <div class="bottom"></div>
+
     </div><!-- / role=form -->
+
+    <hr><p><code id="log"></code></p>
 
     <div id="marker"></div>
 
