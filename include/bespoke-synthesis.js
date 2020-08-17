@@ -144,6 +144,7 @@ export class BespokeSynthesis {
 
   cancel () {
     useWebApi() ? speechSynthesis.cancel() : this.$audioElem.pause();
+    this.speechQueue = [];
     this.speaking = false;
   }
 
