@@ -88,7 +88,7 @@ export class BespokeSynthesis {
         if (!this.speaking) {
           this.speaking = true;
 
-          console.warn('Speak immediately ?!');
+          console.warn('Speak immediately!');
 
           this.handleSpeakQueue();
         }
@@ -101,7 +101,7 @@ export class BespokeSynthesis {
 
   async handleSpeakQueue (ev = null) {
     if (ev) {
-      console.warn('Event:', ev.type, `Length: ${this.speechQueue.length}`, ev);
+      console.debug('Event:', ev.type, `Length: ${this.speechQueue.length}`, ev);
 
       this.speaking = false;
     }
@@ -137,11 +137,14 @@ export class BespokeSynthesis {
         /* AUDIO.srcObject = await response.body.getReader();
         */
       } catch (err) { console.error('>> ERROR.', err); }
+    } else {
+      console.debug('Speech queue is empty!');
     }
   }
 
   cancel () {
     useWebApi() ? speechSynthesis.cancel() : this.$audioElem.pause();
+    this.speaking = false;
   }
 
   pause () {
@@ -152,6 +155,7 @@ export class BespokeSynthesis {
   resume () {
     useWebApi() ? speechSynthesis.resume() : this.$audioElem.play();
     this.paused = false;
+    this.speaking = true;
   }
 
   // https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=javascript#adjust-prosody
