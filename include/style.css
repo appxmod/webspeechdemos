@@ -1,7 +1,7 @@
 
 body {
-  background-color: #2e2e2e;
-  color: #fff;
+  background-color: #4692ce;
+  color: #000;
   margin: 0 auto;
   max-width: 38rem; /* 480px; */
   min-width: 16rem;
@@ -105,7 +105,7 @@ input[type=range]::-moz-range-track {
   margin-bottom: 1rem;
   border-radius: .2rem; /* Was: 5px */
   position: relative;
-  background-color: #fff;
+  background-color: #fffffc2;
   transition: background-color 100ms ease;
 }
 
@@ -184,7 +184,8 @@ button > img {
 
 #log,
 #status {
-  background: #3c3c3c;
+  background: #607D8B;
+  color : #fff;
   border: 1px solid #666;
   border-radius: .2rem;
   display: block;
@@ -201,13 +202,8 @@ button > img {
 }
 
 .error #status {
-  border-color: pink;
-  color: pink;
-}
-
-.success #status {
-  border-color: #5f5;
-  color: #5f5;
+  border-color: red;
+  color: red;
 }
 
 .web-api-no .pitch-field,
